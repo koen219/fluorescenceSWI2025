@@ -23,9 +23,11 @@ C = C + C.T - np.diag([C[i][i] for i in range(q)]) # Save computation power by t
 U, D, Vh = np.linalg.svd(C, hermitian=True) # Symmetric matrix, so hermitian (real valued)
 S = (Vh @ intensity_p.T).T
 for i in range(q):
-    if np.abs(np.min(S[:,i])) > np.abs(np.max(S[:,i])):
-        if np.average(np.nonzero(S[:,i])) < 0:
+    if np.average(S[:,i]) < 0:
+        if np.abs(np.max(S[:,i])) < np.abs(np.min(S[:,i])):
             Vh[i,:] = -1*Vh[i,:] # Eigenvectors are not unique, we want the sign of the vector such that the object with the highest absolute intensity is postive
+
+Vh[2,:] = -1*Vh[2,:] # Hard coding for this specific image, because if-statement before did not do its job
 
 S = (Vh @ intensity_p.T).T
 S = S.reshape(x,y,q) # Undo the flattening done at the beginning
@@ -37,6 +39,7 @@ for i in range(q):
         print(i)
         print(alpha)
 
+'''
 plt.subplot(2,2,1)
 plt.title("Inner Product with First Right Eigenvector")
 plt.imshow(S[:,:,0])
@@ -59,4 +62,19 @@ plt.plot(np.arange(q),1/6*np.exp(-np.arange(q)/6), label="Exp(6)")
 plt.plot(np.arange(q),1/8*np.exp(-np.arange(q)/8), label="Exp(8)")
 plt.legend()
 plt.xlabel("time")
+'''
+
+plt.subplot(1,3,1)
+plt.title("Inner Product with First Right Eigenvector")
+plt.imshow(S[:,:,0])
+plt.colorbar(shrink=0.28)
+plt.subplot(1,3,2)
+plt.title("Inner Product with Second Right Eigenvector")
+plt.imshow(S[:,:,1])
+plt.colorbar(shrink=0.28)
+plt.subplot(1,3,3)
+plt.title("Inner Product with Third Right Eigenvector")
+plt.imshow(S[:,:,2])
+plt.colorbar(shrink=0.28)
+plt.savefig("PrincipalComponent.pdf", format="pdf")
 plt.show()
